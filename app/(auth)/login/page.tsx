@@ -32,6 +32,10 @@ export default function LoginPage() {
       const res = await loginUser(data);
       localStorage.setItem("@vagaflow:token", res.token);
       localStorage.setItem("@vagaflow:role", res.user.role);
+      localStorage.setItem(
+        "@vagaflow:name",
+        String(res.user.profile?.name ?? ""),
+      );
       router.push("/dashboard");
     } catch {
       toast.error("Email ou senha incorretos");

@@ -1,0 +1,226 @@
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import {
+  getCompanyProfile,
+  getCandidateProfile,
+} from "@/services/profile.service";
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("@vagaflow:token");
+    const storedRole = localStorage.getItem("@vagaflow:role");
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    async function loadProfile() {
+      try {
+        if (storedRole === "COMPANY") {
+          const data = await getCompanyProfile();
+          setProfile(data);
+          setRole("COMPANY");
+        } else {
+          const data = await getCandidateProfile();
+          setProfile(data);
+          setRole("CANDIDATE");
+        }
+      } catch {
+        router.push("/login");
+      }
+    }
+
+    loadProfile();
+  }, [router]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  if (!profile) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-zinc-400 text-sm">Carregando...</p>
+      </div>
+    );
+  }
+
+  const firstName = String(profile.name).split(" ")[0];
+  const initial = firstName.charAt(0).toUpperCase();
+
+  const candidateLinks = [
+    {
+      icon: "○",
+      label: "Vagas abertas",
+      description: "Explore oportunidades disponíveis no mercado",
+      href: "/open-positions",
+    },
+    {
+      icon: "◇",
+      label: "Minhas candidaturas",
+      description: "Acompanhe o status de cada aplicação",
+      href: "/applications",
+    },
+    {
+      icon: "□",
+      label: "Meu perfil",
+      description: "Mantenha suas informações atualizadas",
+      href: "/profile",
+    },
+  ];
+
+  const companyLinks = [
+    {
+      icon: "○",
+      label: "Minhas vagas",
+      description: "Gerencie e publique novas posições",
+      href: "/job-offers",
+    },
+    {
+      icon: "□",
+      label: "Perfil da empresa",
+      description: "Edite as informações da sua empresa",
+      href: "/profile",
+    },
+  ];
+
+  const links = role === "COMPANY" ? companyLinks : candidateLinks;
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-zinc-100 px-8 py-5">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <span className="font-bold text-zinc-900 text-xl tracking-tight">
+            Vaga<span className="text-blue-600">flow</span>
+          </span>
+
+          {/* Avatar menu */}
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="w-9 h-9 rounded-full bg-zinc-900 text-white text-sm font-semibold flex items-center justify-center hover:bg-zinc-700 transition-colors"
+            >
+              {initial}
+            </button>
+
+            {menuOpen && (
+              <div className="absolute right-0 mt-2 w-52 bg-white border border-zinc-100 rounded-xl shadow-lg py-2 z-50">
+                <div className="px-4 py-2 border-b border-zinc-100 mb-1">
+                  <p className="text-sm font-medium text-zinc-900">
+                    {String(profile.name)}
+                  </p>
+                  <p className="text-xs text-zinc-400">
+                    {role === "COMPANY" ? "Empresa" : "Candidato"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push("/profile");
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 transition-colors"
+                >
+                  Meu perfil
+                </button>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("@vagaflow:token");
+                    localStorage.removeItem("@vagaflow:role");
+                    router.push("/login");
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-zinc-50 transition-colors"
+                >
+                  Sair
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="max-w-6xl mx-auto px-8 pt-20 pb-16 border-b border-zinc-100">
+        <div className="flex items-center justify-between gap-12">
+          {/* Texto */}
+          <div>
+            <p className="text-sm text-zinc-400 mb-3 uppercase tracking-widest">
+              {role === "COMPANY" ? "Painel da empresa" : "Painel do candidato"}
+            </p>
+            <h1 className="text-5xl font-bold text-zinc-900 leading-tight">
+              Olá, <span className="text-blue-600">{firstName}</span>.
+            </h1>
+            <p className="text-zinc-500 mt-4 text-lg max-w-md">
+              {role === "COMPANY"
+                ? "Gerencie suas vagas e encontre os melhores talentos do mercado."
+                : "Encontre oportunidades que combinam com o seu perfil."}
+            </p>
+          </div>
+
+          {/* Decorativo */}
+          <div className="hidden lg:flex flex-col gap-3 min-w-[320px]">
+            <div className="bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-5">
+              <p className="text-xs text-zinc-400 uppercase tracking-widest mb-1">
+                Plataforma
+              </p>
+              <p className="text-zinc-900 font-semibold text-sm">
+                Conectando talentos às melhores oportunidades do mercado.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-1 bg-zinc-900 rounded-2xl px-5 py-4">
+                <p className="text-white text-2xl font-bold">+500</p>
+                <p className="text-zinc-400 text-xs mt-1">Vagas abertas</p>
+              </div>
+              <div className="flex-1 bg-zinc-50 border border-zinc-100 rounded-2xl px-5 py-4">
+                <p className="text-zinc-900 text-2xl font-bold">+200</p>
+                <p className="text-zinc-400 text-xs mt-1">Empresas ativas</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Cards */}
+      <section className="max-w-6xl mx-auto px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {links.map((link) => (
+            <button
+              key={link.href}
+              onClick={() => router.push(link.href)}
+              className="group text-left border border-zinc-200 rounded-2xl p-8 hover:border-zinc-900 hover:shadow-sm transition-all duration-200"
+            >
+              <span className="text-2xl text-zinc-300 group-hover:text-zinc-900 transition-colors">
+                {link.icon}
+              </span>
+              <h2 className="text-zinc-900 font-semibold text-lg mt-6 mb-2">
+                {link.label}
+              </h2>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                {link.description}
+              </p>
+              <span className="inline-block mt-6 text-sm text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-1 transition-all">
+                Acessar →
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
