@@ -92,6 +92,12 @@ export default function DashboardPage() {
       href: "/job-offers",
     },
     {
+      icon: "◇",
+      label: "Candidaturas recebidas",
+      description: "Veja e gerencie quem se candidatou às suas vagas",
+      href: "/company-applications",
+    },
+    {
       icon: "□",
       label: "Perfil da empresa",
       description: "Edite as informações da sua empresa",
@@ -142,6 +148,7 @@ export default function DashboardPage() {
                   onClick={() => {
                     localStorage.removeItem("@vagaflow:token");
                     localStorage.removeItem("@vagaflow:role");
+                    localStorage.removeItem("@vagaflow:name");
                     router.push("/login");
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-zinc-50 transition-colors"
