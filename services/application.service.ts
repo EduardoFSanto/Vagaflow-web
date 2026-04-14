@@ -1,7 +1,15 @@
 import { api } from "@/lib/api";
 
-export async function applyToJob(jobId: string) {
-  const res = await api.post(`/applications/${jobId}`);
+export type ApplyPayload = {
+  coverLetter?: string;
+  yearsExperience?: number;
+  salaryExpected?: number;
+  startDate?: string;
+  availability?: "IMMEDIATE" | "2_WEEKS" | "1_MONTH" | "NEGOTIABLE";
+};
+
+export async function applyToJob(jobId: string, data: ApplyPayload = {}) {
+  const res = await api.post(`/applications/${jobId}`, data);
   return res.data;
 }
 

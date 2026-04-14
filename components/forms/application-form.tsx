@@ -3,17 +3,16 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { ApplyPayload } from "@/services/application.service";
 
 const applicationFormSchema = z.object({
   coverLetter: z
     .string()
-    .min(50, "Carta de apresentação deve ter no mínimo 50 caracteres")
-    .min(500, "Descreva com mais detalhes sua interesse na vaga"),
+    .min(50, "Carta de apresentação deve ter no mínimo 50 caracteres"),
   yearsExperience: z.number().min(0, "Experiência não pode ser negativa"),
   relevantProjects: z
     .string()
@@ -23,21 +22,19 @@ const applicationFormSchema = z.object({
   availability: z.enum(["IMMEDIATE", "2_WEEKS", "1_MONTH", "NEGOTIABLE"]),
   salaryExpected: z.number().positive("Salário esperado deve ser positivo"),
   startDate: z.string().min(1, "Data de início obrigatória"),
-  employmentPreference: z.array(z.enum(["CLT", "PJ", "AUTONOMO"])),
-  additionalInfo: z.string().optional(),
 });
 
 type ApplicationFormData = z.infer<typeof applicationFormSchema>;
 
 interface ApplicationFormProps {
   jobTitle: string;
-  onSuccess?: () => void;
+  onSubmit: (data: ApplyPayload) => Promise<void>;
   isLoading?: boolean;
 }
 
 export function ApplicationForm({
   jobTitle,
-  onSuccess,
+  onSubmit,
   isLoading = false,
 }: ApplicationFormProps) {
   const {
@@ -48,20 +45,20 @@ export function ApplicationForm({
     resolver: zodResolver(applicationFormSchema),
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function onSubmit(data: ApplicationFormData) {
-    try {
-      // TODO: Chamar API para criar candidatura com os dados acima
-      toast.success("Candidatura enviada com sucesso!");
-      onSuccess?.();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      toast.error("Erro ao enviar candidatura");
-    }
+  async function handleFormSubmit(data: ApplicationFormData) {
+    await onSubmit({
+      coverLetter: data.coverLetter,
+      yearsExperience: data.yearsExperience,
+      salaryExpected: data.salaryExpected,
+      startDate: data.startDate
+        ? new Date(data.startDate).toISOString()
+        : undefined,
+      availability: data.availability,
+    });
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold">Candidatar para</h2>
@@ -181,48 +178,6 @@ export function ApplicationForm({
               {errors.availability.message}
             </p>
           )}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label>Tipo de Contratação Preferida *</Label>
-          <div className="space-y-2">
-            {(["CLT", "PJ", "AUTONOMO"] as const).map((type) => (
-              <div key={type} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id={type}
-                  value={type}
-                  {...register("employmentPreference")}
-                  className="w-4 h-4"
-                />
-                <Label htmlFor={type} className="cursor-pointer">
-                  {type === "CLT" ? "CLT" : type === "PJ" ? "PJ" : "Autônomo"}
-                </Label>
-              </div>
-            ))}
-          </div>
-          {errors.employmentPreference && (
-            <p className="text-destructive text-xs">
-              Selecione pelo menos uma opção
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Informações Adicionais */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Informações Adicionais</h3>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="additionalInfo">
-            Algo mais que gostaria de adicionar? (Opcional)
-          </Label>
-          <Textarea
-            id="additionalInfo"
-            placeholder="Links para portfólio, GitHub, certificados, recomendações, etc."
-            className="resize-none"
-            {...register("additionalInfo")}
-          />
         </div>
       </div>
 
