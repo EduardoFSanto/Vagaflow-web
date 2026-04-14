@@ -162,66 +162,108 @@ export default function DashboardPage() {
       </header>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-8 pt-20 pb-16 border-b border-zinc-100">
-        <div className="flex items-center justify-between gap-12">
-          {/* Texto */}
-          <div>
-            <p className="text-sm text-zinc-400 mb-3 uppercase tracking-widest">
-              {role === "COMPANY" ? "Painel da empresa" : "Painel do candidato"}
-            </p>
-            <h1 className="text-5xl font-bold text-zinc-900 leading-tight">
-              Olá, <span className="text-blue-600">{firstName}</span>.
-            </h1>
-            <p className="text-zinc-500 mt-4 text-lg max-w-md">
-              {role === "COMPANY"
-                ? "Gerencie suas vagas e encontre os melhores talentos do mercado."
-                : "Encontre oportunidades que combinam com o seu perfil."}
-            </p>
-          </div>
-
-          {/* Decorativo */}
-          <div className="hidden lg:flex flex-col gap-3 min-w-[320px]">
-            <div className="bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-5">
-              <p className="text-xs text-zinc-400 uppercase tracking-widest mb-1">
-                Plataforma
-              </p>
-              <p className="text-zinc-900 font-semibold text-sm">
-                Conectando talentos às melhores oportunidades do mercado.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-1 bg-zinc-900 rounded-2xl px-5 py-4">
-                <p className="text-white text-2xl font-bold">+500</p>
-                <p className="text-zinc-400 text-xs mt-1">Vagas abertas</p>
-              </div>
-              <div className="flex-1 bg-zinc-50 border border-zinc-100 rounded-2xl px-5 py-4">
-                <p className="text-zinc-900 text-2xl font-bold">+200</p>
-                <p className="text-zinc-400 text-xs mt-1">Empresas ativas</p>
-              </div>
-            </div>
-          </div>
+      <section className="max-w-6xl mx-auto px-8 pt-16 pb-12">
+        <div className="mb-12">
+          <p className="text-sm text-zinc-400 mb-3 uppercase tracking-widest">
+            {role === "COMPANY" ? "Painel da empresa" : "Painel do candidato"}
+          </p>
+          <h1 className="text-4xl font-bold text-zinc-900 leading-tight">
+            Bem-vindo, <span className="text-blue-600">{firstName}</span>.
+          </h1>
+          <p className="text-zinc-500 mt-3 text-lg">
+            {role === "COMPANY"
+              ? "Gerencie suas vagas e encontre os melhores talentos do mercado."
+              : "Encontre oportunidades que combinam com o seu perfil."}
+          </p>
         </div>
+
+        {/* Estatísticas */}
+        {role === "CANDIDATE" && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6">
+              <p className="text-zinc-600 text-sm font-medium">
+                Total de Candidaturas
+              </p>
+              <p className="text-3xl font-bold text-zinc-900 mt-2">12</p>
+              <p className="text-xs text-blue-600 mt-2">+2 este mês</p>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6">
+              <p className="text-zinc-600 text-sm font-medium">Aprovações</p>
+              <p className="text-3xl font-bold text-zinc-900 mt-2">3</p>
+              <p className="text-xs text-green-600 mt-2">25% de aprovação</p>
+            </div>
+            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-xl p-6">
+              <p className="text-zinc-600 text-sm font-medium">
+                Aguardando Resposta
+              </p>
+              <p className="text-3xl font-bold text-zinc-900 mt-2">5</p>
+              <p className="text-xs text-yellow-600 mt-2">Última há 2 dias</p>
+            </div>
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6">
+              <p className="text-zinc-600 text-sm font-medium">
+                Perfil Visto Por
+              </p>
+              <p className="text-3xl font-bold text-zinc-900 mt-2">18</p>
+              <p className="text-xs text-purple-600 mt-2">Este mês</p>
+            </div>
+          </div>
+        )}
+
+        {role === "COMPANY" && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6">
+              <p className="text-zinc-600 text-sm font-medium">Vagas Abertas</p>
+              <p className="text-3xl font-bold text-zinc-900 mt-2">5</p>
+              <p className="text-xs text-blue-600 mt-2">2 com alta demanda</p>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6">
+              <p className="text-zinc-600 text-sm font-medium">Candidatos</p>
+              <p className="text-3xl font-bold text-zinc-900 mt-2">32</p>
+              <p className="text-xs text-green-600 mt-2">+8 esta semana</p>
+            </div>
+            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-xl p-6">
+              <p className="text-zinc-600 text-sm font-medium">Contratações</p>
+              <p className="text-3xl font-bold text-zinc-900 mt-2">2</p>
+              <p className="text-xs text-yellow-600 mt-2">Este mês</p>
+            </div>
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6">
+              <p className="text-zinc-600 text-sm font-medium">
+                Vagas Visualizadas
+              </p>
+              <p className="text-3xl font-bold text-zinc-900 mt-2">1.2k</p>
+              <p className="text-xs text-purple-600 mt-2">Este mês</p>
+            </div>
+          </div>
+        )}
       </section>
+
+      {/* Separator */}
+      <div className="max-w-6xl mx-auto px-8">
+        <div className="border-t border-zinc-100"></div>
+      </div>
 
       {/* Cards */}
       <section className="max-w-6xl mx-auto px-8 py-16">
+        <h2 className="text-xl font-semibold text-zinc-900 mb-6">
+          Atalhos Rápidos
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {links.map((link) => (
             <button
               key={link.href}
               onClick={() => router.push(link.href)}
-              className="group text-left border border-zinc-200 rounded-2xl p-8 hover:border-zinc-900 hover:shadow-sm transition-all duration-200"
+              className="group text-left border border-zinc-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-md hover:bg-blue-50 transition-all duration-200"
             >
-              <span className="text-2xl text-zinc-300 group-hover:text-zinc-900 transition-colors">
+              <span className="text-3xl text-zinc-300 group-hover:text-blue-600 transition-colors">
                 {link.icon}
               </span>
-              <h2 className="text-zinc-900 font-semibold text-lg mt-6 mb-2">
+              <h3 className="text-zinc-900 font-semibold text-lg mt-4 mb-2 group-hover:text-blue-600">
                 {link.label}
-              </h2>
-              <p className="text-zinc-400 text-sm leading-relaxed">
+              </h3>
+              <p className="text-zinc-500 text-sm leading-relaxed">
                 {link.description}
               </p>
-              <span className="inline-block mt-6 text-sm text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-1 transition-all">
+              <span className="inline-block mt-4 text-sm text-zinc-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all">
                 Acessar →
               </span>
             </button>
