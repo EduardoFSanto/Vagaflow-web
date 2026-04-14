@@ -108,7 +108,7 @@ export default function DashboardPage() {
   const links = role === "COMPANY" ? companyLinks : candidateLinks;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="border-b border-zinc-100 px-8 py-5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -180,58 +180,66 @@ export default function DashboardPage() {
         {/* Estatísticas */}
         {role === "CANDIDATE" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6">
-              <p className="text-zinc-600 text-sm font-medium">
+            <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+              <p className="text-zinc-500 text-xs uppercase tracking-wide">
                 Total de Candidaturas
               </p>
               <p className="text-3xl font-bold text-zinc-900 mt-2">12</p>
-              <p className="text-xs text-blue-600 mt-2">+2 este mês</p>
+              <p className="text-xs text-zinc-500 mt-2">+2 este mês</p>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6">
-              <p className="text-zinc-600 text-sm font-medium">Aprovações</p>
+            <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+              <p className="text-zinc-500 text-xs uppercase tracking-wide">
+                Aprovações
+              </p>
               <p className="text-3xl font-bold text-zinc-900 mt-2">3</p>
-              <p className="text-xs text-green-600 mt-2">25% de aprovação</p>
+              <p className="text-xs text-zinc-500 mt-2">25% de aprovação</p>
             </div>
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-xl p-6">
-              <p className="text-zinc-600 text-sm font-medium">
+            <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+              <p className="text-zinc-500 text-xs uppercase tracking-wide">
                 Aguardando Resposta
               </p>
               <p className="text-3xl font-bold text-zinc-900 mt-2">5</p>
-              <p className="text-xs text-yellow-600 mt-2">Última há 2 dias</p>
+              <p className="text-xs text-zinc-500 mt-2">Última há 2 dias</p>
             </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6">
-              <p className="text-zinc-600 text-sm font-medium">
+            <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+              <p className="text-zinc-500 text-xs uppercase tracking-wide">
                 Perfil Visto Por
               </p>
               <p className="text-3xl font-bold text-zinc-900 mt-2">18</p>
-              <p className="text-xs text-purple-600 mt-2">Este mês</p>
+              <p className="text-xs text-zinc-500 mt-2">Este mês</p>
             </div>
           </div>
         )}
 
         {role === "COMPANY" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6">
-              <p className="text-zinc-600 text-sm font-medium">Vagas Abertas</p>
+            <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+              <p className="text-zinc-500 text-xs uppercase tracking-wide">
+                Vagas Abertas
+              </p>
               <p className="text-3xl font-bold text-zinc-900 mt-2">5</p>
-              <p className="text-xs text-blue-600 mt-2">2 com alta demanda</p>
+              <p className="text-xs text-zinc-500 mt-2">2 com alta demanda</p>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6">
-              <p className="text-zinc-600 text-sm font-medium">Candidatos</p>
+            <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+              <p className="text-zinc-500 text-xs uppercase tracking-wide">
+                Candidatos
+              </p>
               <p className="text-3xl font-bold text-zinc-900 mt-2">32</p>
-              <p className="text-xs text-green-600 mt-2">+8 esta semana</p>
+              <p className="text-xs text-zinc-500 mt-2">+8 esta semana</p>
             </div>
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-xl p-6">
-              <p className="text-zinc-600 text-sm font-medium">Contratações</p>
+            <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+              <p className="text-zinc-500 text-xs uppercase tracking-wide">
+                Contratações
+              </p>
               <p className="text-3xl font-bold text-zinc-900 mt-2">2</p>
-              <p className="text-xs text-yellow-600 mt-2">Este mês</p>
+              <p className="text-xs text-zinc-500 mt-2">Este mês</p>
             </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6">
+            <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
               <p className="text-zinc-600 text-sm font-medium">
                 Vagas Visualizadas
               </p>
               <p className="text-3xl font-bold text-zinc-900 mt-2">1.2k</p>
-              <p className="text-xs text-purple-600 mt-2">Este mês</p>
+              <p className="text-xs text-zinc-500 mt-2">Este mês</p>
             </div>
           </div>
         )}
