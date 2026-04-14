@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { getJobById } from "@/services/job.service";
 import { applyToJob } from "@/services/application.service";
+import { ApplicationForm } from "@/components/forms/application-form";
 
 type Job = {
   id: string;
@@ -41,6 +42,7 @@ export default function JobDetailPage() {
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -84,11 +86,18 @@ export default function JobDetailPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  async function handleApply() {
+  async function handleApply(payload?: {
+    coverLetter?: string;
+    yearsExperience?: number;
+    salaryExpected?: number;
+    startDate?: string;
+    availability?: "IMMEDIATE" | "2_WEEKS" | "1_MONTH" | "NEGOTIABLE";
+  }) {
     try {
       setApplying(true);
-      await applyToJob(id);
+      await applyToJob(id, payload ?? {});
       setApplied(true);
+      setShowApplicationForm(false);
       toast.success("Candidatura enviada!");
     } catch {
       toast.error("Você já se candidatou a esta vaga");
@@ -214,7 +223,7 @@ export default function JobDetailPage() {
             {/* Botão candidatar — só para candidatos */}
             {userRole === "CANDIDATE" && (
               <button
-                onClick={handleApply}
+                onClick={() => setShowApplicationForm((prev) => !prev)}
                 disabled={applying || applied}
                 className={`shrink-0 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   applied
@@ -224,8 +233,8 @@ export default function JobDetailPage() {
               >
                 {applied
                   ? "Candidatura enviada ✓"
-                  : applying
-                    ? "Enviando..."
+                  : showApplicationForm
+                    ? "Fechar formulário"
                     : "Candidatar-se"}
               </button>
             )}
@@ -265,11 +274,21 @@ export default function JobDetailPage() {
           )}
         </div>
 
+        {userRole === "CANDIDATE" && showApplicationForm && !applied && (
+          <div className="mt-12 border border-zinc-200 rounded-2xl p-6 bg-zinc-50">
+            <ApplicationForm
+              jobTitle={job.title}
+              onSubmit={handleApply}
+              isLoading={applying}
+            />
+          </div>
+        )}
+
         {/* Botão candidatar inferior */}
         {userRole === "CANDIDATE" && (
           <div className="mt-12 pt-10 border-t border-zinc-100">
             <button
-              onClick={handleApply}
+              onClick={() => setShowApplicationForm((prev) => !prev)}
               disabled={applying || applied}
               className={`w-full py-3 rounded-lg text-sm font-medium transition-colors ${
                 applied
@@ -279,8 +298,8 @@ export default function JobDetailPage() {
             >
               {applied
                 ? "Candidatura enviada ✓"
-                : applying
-                  ? "Enviando..."
+                : showApplicationForm
+                  ? "Fechar formulário de candidatura"
                   : "Candidatar-se a esta vaga"}
             </button>
           </div>
