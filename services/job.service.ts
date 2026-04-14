@@ -5,6 +5,11 @@ export async function listJobs() {
   return res.data;
 }
 
+export async function getCompanyJobs() {
+  const res = await api.get("/company/profile");
+  return res.data.jobs;
+}
+
 export async function getJobById(id: string) {
   const res = await api.get(`/jobs/${id}`);
   return res.data;

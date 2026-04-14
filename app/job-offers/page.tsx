@@ -11,6 +11,7 @@ import {
   createJob,
   updateJob,
   deleteJob,
+  getCompanyJobs,
 } from "@/services/job.service";
 
 type Job = {
@@ -101,7 +102,7 @@ export default function JobOffersPage() {
 
   async function loadJobs() {
     try {
-      const data = await listJobs();
+      const data = await getCompanyJobs();
       setJobs(data);
     } finally {
       setLoading(false);
