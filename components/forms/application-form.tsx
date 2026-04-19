@@ -32,7 +32,7 @@ interface ApplicationFormProps {
   questions: {
     id: string;
     prompt: string;
-    type: "SHORT_TEXT" | "LONG_TEXT";
+    type: "SHORT_TEXT" | "LONG_TEXT" | "YES_NO";
     required: boolean;
     order: number;
   }[];
@@ -237,6 +237,16 @@ export function ApplicationForm({
                       placeholder="Digite sua resposta"
                       {...register(`questionAnswers.${question.id}` as never)}
                     />
+                  ) : question.type === "YES_NO" ? (
+                    <select
+                      id={`question-${question.id}`}
+                      className="w-full rounded-md border border-zinc-200 px-3 py-2"
+                      {...register(`questionAnswers.${question.id}` as never)}
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="YES">Sim</option>
+                      <option value="NO">Nao</option>
+                    </select>
                   ) : (
                     <Input
                       id={`question-${question.id}`}

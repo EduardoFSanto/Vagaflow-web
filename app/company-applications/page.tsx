@@ -30,7 +30,7 @@ type Application = {
     question: {
       id: string;
       prompt: string;
-      type: "SHORT_TEXT" | "LONG_TEXT";
+      type: "SHORT_TEXT" | "LONG_TEXT" | "YES_NO";
       required: boolean;
       order: number;
     };
@@ -69,6 +69,22 @@ const availabilityLabels: Record<string, string> = {
   "1_MONTH": "Em 1 mes",
   NEGOTIABLE: "Negociavel",
 };
+
+function formatQuestionAnswer(answer: Application["answers"][number]) {
+  if (answer.question.type !== "YES_NO") {
+    return answer.answer;
+  }
+
+  if (answer.answer === "YES") {
+    return "Sim";
+  }
+
+  if (answer.answer === "NO") {
+    return "Nao";
+  }
+
+  return answer.answer;
+}
 
 export default function CompanyApplicationsPage() {
   const router = useRouter();
@@ -367,7 +383,7 @@ export default function CompanyApplicationsPage() {
                                   {item.question.required ? " *" : ""}
                                 </p>
                                 <p className="mt-1 text-sm text-zinc-700 whitespace-pre-line">
-                                  {item.answer}
+                                  {formatQuestionAnswer(item)}
                                 </p>
                               </div>
                             ))}

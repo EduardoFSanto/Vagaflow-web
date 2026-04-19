@@ -31,7 +31,7 @@ type Job = {
   questions: {
     id: string;
     prompt: string;
-    type: "SHORT_TEXT" | "LONG_TEXT";
+    type: "SHORT_TEXT" | "LONG_TEXT" | "YES_NO";
     required: boolean;
     order: number;
   }[];

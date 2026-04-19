@@ -3,14 +3,14 @@ import { api } from "@/lib/api";
 export type JobQuestion = {
   id: string;
   prompt: string;
-  type: "SHORT_TEXT" | "LONG_TEXT";
+  type: "SHORT_TEXT" | "LONG_TEXT" | "YES_NO";
   required: boolean;
   order: number;
 };
 
 export type JobQuestionInput = {
   prompt: string;
-  type: "SHORT_TEXT" | "LONG_TEXT";
+  type: "SHORT_TEXT" | "LONG_TEXT" | "YES_NO";
   required: boolean;
 };
 

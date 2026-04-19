@@ -16,7 +16,7 @@ import {
 type Question = {
   id: string;
   prompt: string;
-  type: "SHORT_TEXT" | "LONG_TEXT";
+  type: "SHORT_TEXT" | "LONG_TEXT" | "YES_NO";
   required: boolean;
   order: number;
 };
@@ -52,7 +52,7 @@ const statusConfig = {
 
 const questionSchema = z.object({
   prompt: z.string().min(10, "Pergunta deve ter no mínimo 10 caracteres"),
-  type: z.enum(["SHORT_TEXT", "LONG_TEXT"]),
+  type: z.enum(["SHORT_TEXT", "LONG_TEXT", "YES_NO"]),
   required: z.boolean(),
 });
 
@@ -372,7 +372,7 @@ export default function JobOffersPage() {
       {/* Modal criar/editar */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-6 md:p-8 max-h-[92vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-zinc-900 mb-6">
               {editingJob ? "Editar vaga" : "Nova vaga"}
             </h2>
@@ -411,7 +411,7 @@ export default function JobOffersPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-zinc-700">
                     Localização
@@ -441,7 +441,7 @@ export default function JobOffersPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-zinc-700">
                     Tipo
@@ -456,116 +456,116 @@ export default function JobOffersPage() {
                   </select>
                 </div>
 
-                <div className="space-y-3 border-t border-zinc-100 pt-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-zinc-700">
-                        Perguntas de triagem
-                      </p>
-                      <p className="text-xs text-zinc-400">
-                        Faça perguntas extras para avaliar melhor os candidatos.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        questionFieldArray.append({
-                          prompt: "",
-                          type: "SHORT_TEXT",
-                          required: false,
-                        })
-                      }
-                      className="px-3 py-1.5 border border-zinc-200 text-zinc-600 text-xs rounded-lg hover:border-zinc-900 hover:text-zinc-900 transition-colors"
-                    >
-                      + Nova pergunta
-                    </button>
-                  </div>
-
-                  {questionFieldArray.fields.length === 0 ? (
-                    <p className="text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 rounded-lg p-3">
-                      Sem perguntas extras. Você pode publicar assim, mas
-                      incluir 2 ou 3 perguntas costuma melhorar a qualidade da
-                      seleção.
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {questionFieldArray.fields.map((field, index) => (
-                        <div
-                          key={field.id}
-                          className="border border-zinc-200 rounded-xl p-3 space-y-3"
-                        >
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs font-medium text-zinc-500">
-                              Pergunta {index + 1}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => questionFieldArray.remove(index)}
-                              className="text-xs text-red-500 hover:text-red-600"
-                            >
-                              Remover
-                            </button>
-                          </div>
-
-                          <textarea
-                            rows={2}
-                            placeholder="Ex: Conte um projeto em que você melhorou performance de uma aplicação"
-                            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
-                            {...form.register(`questions.${index}.prompt`)}
-                          />
-                          {form.formState.errors.questions?.[index]?.prompt && (
-                            <p className="text-xs text-red-500">
-                              {
-                                form.formState.errors.questions[index]?.prompt
-                                  ?.message as string
-                              }
-                            </p>
-                          )}
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                              <label className="text-xs font-medium text-zinc-600">
-                                Tipo de resposta
-                              </label>
-                              <select
-                                className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
-                                {...form.register(`questions.${index}.type`)}
-                              >
-                                <option value="SHORT_TEXT">Texto curto</option>
-                                <option value="LONG_TEXT">Texto longo</option>
-                              </select>
-                            </div>
-
-                            <div className="flex items-end pb-2">
-                              <label className="flex items-center gap-2 text-sm text-zinc-600">
-                                <input
-                                  type="checkbox"
-                                  className="w-4 h-4 accent-zinc-900"
-                                  {...form.register(
-                                    `questions.${index}.required`,
-                                  )}
-                                />
-                                Pergunta obrigatória
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3 pt-6">
-                  <input
-                    type="checkbox"
-                    id="remote"
-                    className="w-4 h-4 accent-zinc-900"
-                    {...form.register("remote")}
-                  />
-                  <label htmlFor="remote" className="text-sm text-zinc-700">
+                <div className="flex items-end md:justify-start">
+                  <label className="flex items-center gap-3 text-sm text-zinc-700 pt-1">
+                    <input
+                      type="checkbox"
+                      id="remote"
+                      className="w-4 h-4 accent-zinc-900"
+                      {...form.register("remote")}
+                    />
                     Remoto
                   </label>
                 </div>
+              </div>
+
+              <div className="space-y-3 border-t border-zinc-100 pt-5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-zinc-700">
+                      Perguntas de triagem
+                    </p>
+                    <p className="text-xs text-zinc-400">
+                      Faça perguntas extras para avaliar melhor os candidatos.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      questionFieldArray.append({
+                        prompt: "",
+                        type: "SHORT_TEXT",
+                        required: false,
+                      })
+                    }
+                    className="px-3 py-1.5 border border-zinc-200 text-zinc-600 text-xs rounded-lg hover:border-zinc-900 hover:text-zinc-900 transition-colors w-full sm:w-auto"
+                  >
+                    + Nova pergunta
+                  </button>
+                </div>
+
+                {questionFieldArray.fields.length === 0 ? (
+                  <p className="text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 rounded-lg p-3">
+                    Sem perguntas extras. Você pode publicar assim, mas incluir
+                    2 ou 3 perguntas costuma melhorar a qualidade da seleção.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {questionFieldArray.fields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        className="border border-zinc-200 rounded-xl p-4 space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium text-zinc-500">
+                            Pergunta {index + 1}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => questionFieldArray.remove(index)}
+                            className="text-xs text-red-500 hover:text-red-600"
+                          >
+                            Remover
+                          </button>
+                        </div>
+
+                        <textarea
+                          rows={3}
+                          placeholder="Ex: Conte um projeto em que você melhorou performance de uma aplicação"
+                          className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
+                          {...form.register(`questions.${index}.prompt`)}
+                        />
+                        {form.formState.errors.questions?.[index]?.prompt && (
+                          <p className="text-xs text-red-500">
+                            {
+                              form.formState.errors.questions[index]?.prompt
+                                ?.message as string
+                            }
+                          </p>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-zinc-600">
+                              Tipo de resposta
+                            </label>
+                            <select
+                              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                              {...form.register(`questions.${index}.type`)}
+                            >
+                              <option value="SHORT_TEXT">Texto curto</option>
+                              <option value="LONG_TEXT">Texto longo</option>
+                              <option value="YES_NO">Select Sim/Não</option>
+                            </select>
+                          </div>
+
+                          <div className="flex items-end pb-2">
+                            <label className="flex items-center gap-2 text-sm text-zinc-600">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4 accent-zinc-900"
+                                {...form.register(
+                                  `questions.${index}.required`,
+                                )}
+                              />
+                              Pergunta obrigatória
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-3 pt-2">
