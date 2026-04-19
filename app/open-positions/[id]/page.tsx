@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 import { getJobById } from "@/services/job.service";
 import { applyToJob } from "@/services/application.service";
 import { ApplicationForm } from "@/components/forms/application-form";
@@ -99,8 +100,15 @@ export default function JobDetailPage() {
       setApplied(true);
       setShowApplicationForm(false);
       toast.success("Candidatura enviada!");
-    } catch {
-      toast.error("Você já se candidatou a esta vaga");
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      if (err.response?.status === 409) {
+        toast.error("Você já se candidatou a esta vaga");
+      } else {
+        toast.error(
+          err.response?.data?.message ?? "Não foi possível enviar candidatura",
+        );
+      }
     } finally {
       setApplying(false);
     }

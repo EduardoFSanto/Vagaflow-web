@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -8,16 +8,28 @@ import {
   updateApplicationStatus,
 } from "@/services/application.service";
 
+type ApplicationStatus =
+  | "PENDING"
+  | "REVIEWING"
+  | "APPROVED"
+  | "REJECTED"
+  | "HIRED";
+
 type Application = {
   id: string;
-  status: "PENDING" | "ACCEPTED" | "REJECTED";
+  status: ApplicationStatus;
   createdAt: string;
+  coverLetter?: string;
+  salaryExpected?: number;
+  availability?: string;
+  startDate?: string;
+  yearsExperience?: number;
   candidate: {
     id: string;
     name: string;
     bio?: string;
     skills: string[];
-    experience?: string;
+    experience?: number;
     resumeUrl?: string;
     user: {
       email: string;
@@ -29,10 +41,22 @@ type Application = {
   };
 };
 
-const statusConfig = {
-  PENDING: { label: "Em análise", color: "bg-yellow-50 text-yellow-600" },
-  ACCEPTED: { label: "Aprovado", color: "bg-green-50 text-green-600" },
-  REJECTED: { label: "Recusado", color: "bg-red-50 text-red-500" },
+const statusConfig: Record<
+  ApplicationStatus,
+  { label: string; color: string }
+> = {
+  PENDING: { label: "Em analise", color: "bg-yellow-50 text-yellow-700" },
+  REVIEWING: { label: "Em revisao", color: "bg-blue-50 text-blue-700" },
+  APPROVED: { label: "Aprovado", color: "bg-green-50 text-green-700" },
+  REJECTED: { label: "Recusado", color: "bg-red-50 text-red-600" },
+  HIRED: { label: "Contratado", color: "bg-emerald-50 text-emerald-700" },
+};
+
+const availabilityLabels: Record<string, string> = {
+  IMMEDIATE: "Imediatamente",
+  "2_WEEKS": "Em 2 semanas",
+  "1_MONTH": "Em 1 mes",
+  NEGOTIABLE: "Negociavel",
 };
 
 export default function CompanyApplicationsPage() {
@@ -78,14 +102,14 @@ export default function CompanyApplicationsPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  async function handleStatus(id: string, status: "ACCEPTED" | "REJECTED") {
+  async function handleStatus(id: string, status: "APPROVED" | "REJECTED") {
     try {
       await updateApplicationStatus(id, status);
       setApplications((prev) =>
         prev.map((app) => (app.id === id ? { ...app, status } : app)),
       );
       toast.success(
-        status === "ACCEPTED" ? "Candidato aprovado!" : "Candidato recusado!",
+        status === "APPROVED" ? "Candidato aprovado!" : "Candidato recusado!",
       );
     } catch {
       toast.error("Erro ao atualizar status");
@@ -104,7 +128,6 @@ export default function CompanyApplicationsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <header className="border-b border-zinc-100 px-8 py-5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button
@@ -157,7 +180,6 @@ export default function CompanyApplicationsPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-8 py-16">
-        {/* Hero */}
         <div className="mb-12 border-b border-zinc-100 pb-10">
           <p className="text-sm text-zinc-400 uppercase tracking-widest mb-2">
             Empresa
@@ -170,7 +192,6 @@ export default function CompanyApplicationsPage() {
           </p>
         </div>
 
-        {/* Lista */}
         {applications.length === 0 ? (
           <div className="text-center py-24">
             <p className="text-zinc-400 text-sm">
@@ -183,7 +204,6 @@ export default function CompanyApplicationsPage() {
               <div key={app.id} className="py-6">
                 <div className="flex items-start justify-between gap-6">
                   <div className="flex items-start gap-4">
-                    {/* Avatar */}
                     <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-sm font-semibold shrink-0">
                       {app.candidate.name.charAt(0).toUpperCase()}
                     </div>
@@ -202,7 +222,6 @@ export default function CompanyApplicationsPage() {
                         </span>
                       </p>
 
-                      {/* Skills */}
                       {app.candidate.skills?.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-3">
                           {app.candidate.skills.map((skill) => (
@@ -234,10 +253,12 @@ export default function CompanyApplicationsPage() {
                       >
                         {expandedId === app.id ? "Fechar" : "Ver detalhes"}
                       </button>
-                      {app.status === "PENDING" && (
+
+                      {(app.status === "PENDING" ||
+                        app.status === "REVIEWING") && (
                         <>
                           <button
-                            onClick={() => handleStatus(app.id, "ACCEPTED")}
+                            onClick={() => handleStatus(app.id, "APPROVED")}
                             className="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors"
                           >
                             Aprovar
@@ -258,9 +279,64 @@ export default function CompanyApplicationsPage() {
                   </div>
                 </div>
 
-                {/* Detalhes expandidos */}
                 {expandedId === app.id && (
                   <div className="mt-4 ml-14 p-4 bg-zinc-50 rounded-xl space-y-3">
+                    {app.coverLetter && (
+                      <div>
+                        <p className="text-xs font-medium text-zinc-500 mb-1">
+                          Carta de apresentacao
+                        </p>
+                        <p className="text-sm text-zinc-700 whitespace-pre-line">
+                          {app.coverLetter}
+                        </p>
+                      </div>
+                    )}
+
+                    {typeof app.yearsExperience === "number" && (
+                      <div>
+                        <p className="text-xs font-medium text-zinc-500 mb-1">
+                          Experiencia informada na candidatura
+                        </p>
+                        <p className="text-sm text-zinc-700">
+                          {app.yearsExperience} ano(s)
+                        </p>
+                      </div>
+                    )}
+
+                    {typeof app.salaryExpected === "number" && (
+                      <div>
+                        <p className="text-xs font-medium text-zinc-500 mb-1">
+                          Pretensao salarial
+                        </p>
+                        <p className="text-sm text-zinc-700">
+                          R$ {app.salaryExpected.toLocaleString("pt-BR")}
+                        </p>
+                      </div>
+                    )}
+
+                    {app.availability && (
+                      <div>
+                        <p className="text-xs font-medium text-zinc-500 mb-1">
+                          Disponibilidade
+                        </p>
+                        <p className="text-sm text-zinc-700">
+                          {availabilityLabels[app.availability] ??
+                            app.availability}
+                        </p>
+                      </div>
+                    )}
+
+                    {app.startDate && (
+                      <div>
+                        <p className="text-xs font-medium text-zinc-500 mb-1">
+                          Data de inicio
+                        </p>
+                        <p className="text-sm text-zinc-700">
+                          {new Date(app.startDate).toLocaleDateString("pt-BR")}
+                        </p>
+                      </div>
+                    )}
+
                     {app.candidate.bio && (
                       <div>
                         <p className="text-xs font-medium text-zinc-500 mb-1">
@@ -271,16 +347,18 @@ export default function CompanyApplicationsPage() {
                         </p>
                       </div>
                     )}
-                    {app.candidate.experience && (
+
+                    {typeof app.candidate.experience === "number" && (
                       <div>
                         <p className="text-xs font-medium text-zinc-500 mb-1">
-                          Experiência
+                          Experiencia do perfil
                         </p>
                         <p className="text-sm text-zinc-700">
-                          {app.candidate.experience}
+                          {app.candidate.experience} ano(s)
                         </p>
                       </div>
                     )}
+
                     {app.candidate.resumeUrl && (
                       <a
                         href={app.candidate.resumeUrl}
@@ -288,9 +366,23 @@ export default function CompanyApplicationsPage() {
                         rel="noopener noreferrer"
                         className="inline-block text-sm text-blue-600 hover:underline"
                       >
-                        Ver currículo →
+                        Ver curriculo {">"}
                       </a>
                     )}
+
+                    {!app.coverLetter &&
+                    app.yearsExperience == null &&
+                    app.salaryExpected == null &&
+                    !app.availability &&
+                    !app.startDate &&
+                    !app.candidate.bio &&
+                    app.candidate.experience == null &&
+                    !app.candidate.resumeUrl ? (
+                      <p className="text-sm text-zinc-500">
+                        Candidato nao informou dados adicionais nesta
+                        candidatura.
+                      </p>
+                    ) : null}
                   </div>
                 )}
               </div>

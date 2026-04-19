@@ -25,7 +25,7 @@ export async function listCompanyApplications() {
 
 export async function updateApplicationStatus(
   id: string,
-  status: "PENDING" | "ACCEPTED" | "REJECTED",
+  status: "PENDING" | "REVIEWING" | "APPROVED" | "REJECTED" | "HIRED",
 ) {
   const res = await api.patch(`/applications/${id}`, { status });
   return res.data;
