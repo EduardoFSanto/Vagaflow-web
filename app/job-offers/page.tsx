@@ -2,17 +2,24 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import {
-  listJobs,
   createJob,
   updateJob,
   deleteJob,
   getCompanyJobs,
 } from "@/services/job.service";
+
+type Question = {
+  id: string;
+  prompt: string;
+  type: "SHORT_TEXT" | "LONG_TEXT";
+  required: boolean;
+  order: number;
+};
 
 type Job = {
   id: string;
@@ -28,6 +35,7 @@ type Job = {
     id: string;
     name: string;
   };
+  questions: Question[];
 };
 
 const typeLabel = {
@@ -42,6 +50,12 @@ const statusConfig = {
   CLOSED: { label: "Fechada", color: "bg-zinc-100 text-zinc-500" },
 };
 
+const questionSchema = z.object({
+  prompt: z.string().min(10, "Pergunta deve ter no mínimo 10 caracteres"),
+  type: z.enum(["SHORT_TEXT", "LONG_TEXT"]),
+  required: z.boolean(),
+});
+
 const jobSchema = z.object({
   title: z.string().min(3, "Mínimo 3 caracteres"),
   description: z.string().min(20, "Mínimo 20 caracteres"),
@@ -49,6 +63,7 @@ const jobSchema = z.object({
   salary: z.number().positive("Deve ser positivo").optional(),
   remote: z.boolean(),
   type: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT"]),
+  questions: z.array(questionSchema).max(8, "Máximo de 8 perguntas"),
 });
 
 type JobForm = z.infer<typeof jobSchema>;
@@ -72,7 +87,13 @@ export default function JobOffersPage() {
       location: "",
       remote: false,
       type: "FULL_TIME",
+      questions: [],
     },
+  });
+
+  const questionFieldArray = useFieldArray({
+    control: form.control,
+    name: "questions",
   });
 
   useEffect(() => {
@@ -117,6 +138,7 @@ export default function JobOffersPage() {
       location: "",
       remote: false,
       type: "FULL_TIME",
+      questions: [],
     });
     setModalOpen(true);
   }
@@ -130,17 +152,31 @@ export default function JobOffersPage() {
       salary: job.salary,
       remote: job.remote,
       type: job.type,
+      questions: (job.questions ?? []).map((question) => ({
+        prompt: question.prompt,
+        type: question.type,
+        required: question.required,
+      })),
     });
     setModalOpen(true);
   }
 
   async function onSubmit(data: JobForm) {
     try {
+      const payload = {
+        ...data,
+        questions: data.questions.map((question) => ({
+          prompt: question.prompt.trim(),
+          type: question.type,
+          required: question.required,
+        })),
+      };
+
       if (editingJob) {
-        await updateJob(editingJob.id, data);
+        await updateJob(editingJob.id, payload);
         toast.success("Vaga atualizada!");
       } else {
-        await createJob(data);
+        await createJob(payload);
         toast.success("Vaga criada!");
       }
       setModalOpen(false);
@@ -418,6 +454,105 @@ export default function JobOffersPage() {
                     <option value="PART_TIME">Meio período</option>
                     <option value="CONTRACT">Contrato</option>
                   </select>
+                </div>
+
+                <div className="space-y-3 border-t border-zinc-100 pt-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-zinc-700">
+                        Perguntas de triagem
+                      </p>
+                      <p className="text-xs text-zinc-400">
+                        Faça perguntas extras para avaliar melhor os candidatos.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        questionFieldArray.append({
+                          prompt: "",
+                          type: "SHORT_TEXT",
+                          required: false,
+                        })
+                      }
+                      className="px-3 py-1.5 border border-zinc-200 text-zinc-600 text-xs rounded-lg hover:border-zinc-900 hover:text-zinc-900 transition-colors"
+                    >
+                      + Nova pergunta
+                    </button>
+                  </div>
+
+                  {questionFieldArray.fields.length === 0 ? (
+                    <p className="text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 rounded-lg p-3">
+                      Sem perguntas extras. Você pode publicar assim, mas
+                      incluir 2 ou 3 perguntas costuma melhorar a qualidade da
+                      seleção.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {questionFieldArray.fields.map((field, index) => (
+                        <div
+                          key={field.id}
+                          className="border border-zinc-200 rounded-xl p-3 space-y-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-medium text-zinc-500">
+                              Pergunta {index + 1}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => questionFieldArray.remove(index)}
+                              className="text-xs text-red-500 hover:text-red-600"
+                            >
+                              Remover
+                            </button>
+                          </div>
+
+                          <textarea
+                            rows={2}
+                            placeholder="Ex: Conte um projeto em que você melhorou performance de uma aplicação"
+                            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
+                            {...form.register(`questions.${index}.prompt`)}
+                          />
+                          {form.formState.errors.questions?.[index]?.prompt && (
+                            <p className="text-xs text-red-500">
+                              {
+                                form.formState.errors.questions[index]?.prompt
+                                  ?.message as string
+                              }
+                            </p>
+                          )}
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <label className="text-xs font-medium text-zinc-600">
+                                Tipo de resposta
+                              </label>
+                              <select
+                                className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                                {...form.register(`questions.${index}.type`)}
+                              >
+                                <option value="SHORT_TEXT">Texto curto</option>
+                                <option value="LONG_TEXT">Texto longo</option>
+                              </select>
+                            </div>
+
+                            <div className="flex items-end pb-2">
+                              <label className="flex items-center gap-2 text-sm text-zinc-600">
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 accent-zinc-900"
+                                  {...form.register(
+                                    `questions.${index}.required`,
+                                  )}
+                                />
+                                Pergunta obrigatória
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3 pt-6">

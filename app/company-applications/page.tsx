@@ -24,6 +24,17 @@ type Application = {
   availability?: string;
   startDate?: string;
   yearsExperience?: number;
+  answers: {
+    id: string;
+    answer: string;
+    question: {
+      id: string;
+      prompt: string;
+      type: "SHORT_TEXT" | "LONG_TEXT";
+      required: boolean;
+      order: number;
+    };
+  }[];
   candidate: {
     id: string;
     name: string;
@@ -337,6 +348,33 @@ export default function CompanyApplicationsPage() {
                       </div>
                     )}
 
+                    {app.answers?.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-zinc-500 mb-2">
+                          Respostas das perguntas da vaga
+                        </p>
+                        <div className="space-y-2">
+                          {app.answers
+                            .slice()
+                            .sort((a, b) => a.question.order - b.question.order)
+                            .map((item) => (
+                              <div
+                                key={item.id}
+                                className="rounded-lg border border-zinc-200 bg-white p-3"
+                              >
+                                <p className="text-xs font-medium text-zinc-600">
+                                  {item.question.prompt}
+                                  {item.question.required ? " *" : ""}
+                                </p>
+                                <p className="mt-1 text-sm text-zinc-700 whitespace-pre-line">
+                                  {item.answer}
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
                     {app.candidate.bio && (
                       <div>
                         <p className="text-xs font-medium text-zinc-500 mb-1">
@@ -375,6 +413,7 @@ export default function CompanyApplicationsPage() {
                     app.salaryExpected == null &&
                     !app.availability &&
                     !app.startDate &&
+                    (!app.answers || app.answers.length === 0) &&
                     !app.candidate.bio &&
                     app.candidate.experience == null &&
                     !app.candidate.resumeUrl ? (

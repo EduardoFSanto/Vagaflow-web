@@ -28,6 +28,13 @@ type Job = {
   _count: {
     applications: number;
   };
+  questions: {
+    id: string;
+    prompt: string;
+    type: "SHORT_TEXT" | "LONG_TEXT";
+    required: boolean;
+    order: number;
+  }[];
 };
 
 const typeLabel = {
@@ -93,6 +100,10 @@ export default function JobDetailPage() {
     salaryExpected?: number;
     startDate?: string;
     availability?: "IMMEDIATE" | "2_WEEKS" | "1_MONTH" | "NEGOTIABLE";
+    questionAnswers?: {
+      questionId: string;
+      answer: string;
+    }[];
   }) {
     try {
       setApplying(true);
@@ -286,6 +297,7 @@ export default function JobDetailPage() {
           <div className="mt-12 border border-zinc-200 rounded-2xl p-6 bg-zinc-50">
             <ApplicationForm
               jobTitle={job.title}
+              questions={job.questions ?? []}
               onSubmit={handleApply}
               isLoading={applying}
             />

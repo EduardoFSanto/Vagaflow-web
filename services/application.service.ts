@@ -6,6 +6,10 @@ export type ApplyPayload = {
   salaryExpected?: number;
   startDate?: string;
   availability?: "IMMEDIATE" | "2_WEEKS" | "1_MONTH" | "NEGOTIABLE";
+  questionAnswers?: {
+    questionId: string;
+    answer: string;
+  }[];
 };
 
 export async function applyToJob(jobId: string, data: ApplyPayload = {}) {

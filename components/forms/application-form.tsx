@@ -22,30 +22,63 @@ const applicationFormSchema = z.object({
   availability: z.enum(["IMMEDIATE", "2_WEEKS", "1_MONTH", "NEGOTIABLE"]),
   salaryExpected: z.number().positive("Salário esperado deve ser positivo"),
   startDate: z.string().min(1, "Data de início obrigatória"),
+  questionAnswers: z.record(z.string(), z.string()).optional(),
 });
 
 type ApplicationFormData = z.infer<typeof applicationFormSchema>;
 
 interface ApplicationFormProps {
   jobTitle: string;
+  questions: {
+    id: string;
+    prompt: string;
+    type: "SHORT_TEXT" | "LONG_TEXT";
+    required: boolean;
+    order: number;
+  }[];
   onSubmit: (data: ApplyPayload) => Promise<void>;
   isLoading?: boolean;
 }
 
 export function ApplicationForm({
   jobTitle,
+  questions,
   onSubmit,
   isLoading = false,
 }: ApplicationFormProps) {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationFormSchema),
+    defaultValues: {
+      questionAnswers: questions.reduce<Record<string, string>>((acc, item) => {
+        acc[item.id] = "";
+        return acc;
+      }, {}),
+    },
   });
 
   async function handleFormSubmit(data: ApplicationFormData) {
+    for (const question of questions) {
+      const answer = data.questionAnswers?.[question.id]?.trim() ?? "";
+      if (question.required && !answer) {
+        setError(`questionAnswers.${question.id}` as never, {
+          message: "Resposta obrigatória",
+        });
+        return;
+      }
+    }
+
+    const questionAnswers = questions
+      .map((question) => ({
+        questionId: question.id,
+        answer: data.questionAnswers?.[question.id]?.trim() ?? "",
+      }))
+      .filter((item) => item.answer.length > 0);
+
     await onSubmit({
       coverLetter: data.coverLetter,
       yearsExperience: data.yearsExperience,
@@ -54,6 +87,7 @@ export function ApplicationForm({
         ? new Date(data.startDate).toISOString()
         : undefined,
       availability: data.availability,
+      questionAnswers,
     });
   }
 
@@ -180,6 +214,47 @@ export function ApplicationForm({
           )}
         </div>
       </div>
+
+      {questions.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Perguntas da vaga</h3>
+
+          <div className="space-y-4">
+            {questions
+              .slice()
+              .sort((a, b) => a.order - b.order)
+              .map((question, index) => (
+                <div key={question.id} className="space-y-1.5">
+                  <Label htmlFor={`question-${question.id}`}>
+                    {index + 1}. {question.prompt}
+                    {question.required ? " *" : ""}
+                  </Label>
+
+                  {question.type === "LONG_TEXT" ? (
+                    <Textarea
+                      id={`question-${question.id}`}
+                      className="resize-none min-h-[120px]"
+                      placeholder="Digite sua resposta"
+                      {...register(`questionAnswers.${question.id}` as never)}
+                    />
+                  ) : (
+                    <Input
+                      id={`question-${question.id}`}
+                      placeholder="Digite sua resposta"
+                      {...register(`questionAnswers.${question.id}` as never)}
+                    />
+                  )}
+
+                  {errors.questionAnswers?.[question.id] && (
+                    <p className="text-destructive text-xs">
+                      {errors.questionAnswers?.[question.id]?.message as string}
+                    </p>
+                  )}
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-900">

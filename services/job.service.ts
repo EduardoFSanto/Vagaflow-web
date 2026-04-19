@@ -1,5 +1,29 @@
 import { api } from "@/lib/api";
 
+export type JobQuestion = {
+  id: string;
+  prompt: string;
+  type: "SHORT_TEXT" | "LONG_TEXT";
+  required: boolean;
+  order: number;
+};
+
+export type JobQuestionInput = {
+  prompt: string;
+  type: "SHORT_TEXT" | "LONG_TEXT";
+  required: boolean;
+};
+
+type JobUpsertPayload = {
+  title: string;
+  description: string;
+  salary?: number;
+  location: string;
+  remote: boolean;
+  type: "FULL_TIME" | "PART_TIME" | "CONTRACT";
+  questions?: JobQuestionInput[];
+};
+
 export async function listJobs() {
   const res = await api.get("/jobs");
   return res.data;
@@ -15,27 +39,14 @@ export async function getJobById(id: string) {
   return res.data;
 }
 
-export async function createJob(data: {
-  title: string;
-  description: string;
-  salary?: number;
-  location: string;
-  remote: boolean;
-  type: "FULL_TIME" | "PART_TIME" | "CONTRACT";
-}) {
+export async function createJob(data: JobUpsertPayload) {
   const res = await api.post("/jobs", data);
   return res.data;
 }
 
 export async function updateJob(
   id: string,
-  data: {
-    title?: string;
-    description?: string;
-    salary?: number;
-    location?: string;
-    remote?: boolean;
-    type?: "FULL_TIME" | "PART_TIME" | "CONTRACT";
+  data: Partial<JobUpsertPayload> & {
     status?: "OPEN" | "CLOSED" | "PAUSED";
   },
 ) {
