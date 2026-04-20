@@ -7,6 +7,7 @@ import { z } from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 import { Building2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,9 +40,20 @@ export default function RegisterPage() {
       const res = await registerUser({ ...data, role });
       localStorage.setItem("@vagaflow:token", res.token);
       localStorage.setItem("@vagaflow:role", res.user.role);
+      localStorage.setItem(
+        "@vagaflow:name",
+        String(
+          (res.user.profile as { name?: string } | null)?.name ?? data.name,
+        ),
+      );
       router.push("/dashboard");
-    } catch {
-      toast.error("Erro ao criar conta. Tente novamente.");
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      if (err.response?.status === 409) {
+        toast.error("Este email ja esta em uso");
+      } else {
+        toast.error(err.message || "Erro ao criar conta. Tente novamente.");
+      }
     }
   }
 

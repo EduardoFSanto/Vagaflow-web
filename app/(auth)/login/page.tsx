@@ -6,6 +6,7 @@ import { z } from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,8 +38,13 @@ export default function LoginPage() {
         String(res.user.profile?.name ?? ""),
       );
       router.push("/dashboard");
-    } catch {
-      toast.error("Email ou senha incorretos");
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      if (err.response?.status === 401) {
+        toast.error("Email ou senha incorretos");
+      } else {
+        toast.error(err.message || "Erro ao entrar. Tente novamente.");
+      }
     }
   }
 
